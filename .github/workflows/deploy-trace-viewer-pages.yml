@@ -45,6 +45,8 @@ jobs:
       - name: Build trace viewer
         run: |
           cd packages/trace-viewer
+          rm -rf ../playwright-core/lib/vite/traceViewer
+          npx vite --config vite.sw.config.ts build
           npx vite build
 
       - name: Stage artifact
