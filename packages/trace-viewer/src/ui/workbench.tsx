@@ -23,6 +23,7 @@ import { ErrorsTab, useErrorsTabModel } from './errorsTab';
 import { ConsoleTab, useConsoleTabModel } from './consoleTab';
 import type { TraceModel, SourceLocation, ActionTraceEventInContext, SourceModel } from '@isomorphic/trace/traceModel';
 import { NetworkTab, useNetworkTabModel } from './networkTab';
+import { GraphqlTab, useGraphqlTabModel } from './graphqlTab';
 import { SnapshotTabsView } from './snapshotTab';
 import { SourceTab } from './sourceTab';
 import { TabbedPane } from '@web/components/tabbedPane';
@@ -194,6 +195,7 @@ const PartitionedWorkbench: React.FunctionComponent<WorkbenchProps & { partition
 
   const consoleModel = useConsoleTabModel(model, selectedTime);
   const networkModel = useNetworkTabModel(model, selectedTime);
+  const graphqlModel = useGraphqlTabModel(model, selectedTime);
   const errorsModel = useErrorsTabModel(model);
 
   const revealedStack = React.useMemo(() => {
@@ -273,6 +275,12 @@ const PartitionedWorkbench: React.FunctionComponent<WorkbenchProps & { partition
     count: networkModel.resources.length,
     render: () => <NetworkTab boundaries={boundaries} networkModel={networkModel} sdkLanguage={model?.sdkLanguage ?? 'javascript'} />
   };
+  const graphqlTab: TabbedPaneTabModel = {
+    id: 'graphql',
+    title: 'GraphQL',
+    count: graphqlModel.candidates.length,
+    render: () => <GraphqlTab boundaries={boundaries} graphqlModel={graphqlModel} sdkLanguage={model?.sdkLanguage ?? 'javascript'} />
+  };
   const attachmentsTab: TabbedPaneTabModel = {
     id: 'attachments',
     title: 'Attachments',
@@ -287,6 +295,7 @@ const PartitionedWorkbench: React.FunctionComponent<WorkbenchProps & { partition
     errorsTab,
     consoleTab,
     networkTab,
+    graphqlTab,
     sourceTab,
     attachmentsTab,
   ];

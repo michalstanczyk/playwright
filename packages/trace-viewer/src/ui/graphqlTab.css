@@ -1,0 +1,30 @@
+/*
+  Copyright (c) Microsoft Corporation.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+*/
+
+.graphql-operation-kind {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.graphql-operation-kind.kind-mutation {
+  background-color: var(--vscode-charts-orange);
+  color: var(--vscode-editor-background);
+}
+
+.graphql-operation-kind.kind-subscription {
+  background-color: var(--vscode-charts-purple);
+  color: var(--vscode-editor-background);
+}
