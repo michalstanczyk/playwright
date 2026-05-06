@@ -8,23 +8,110 @@
       http://www.apache.org/licenses/LICENSE-2.0
 */
 
-.graphql-operation-kind {
-  display: inline-block;
-  padding: 0 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  line-height: 16px;
+.graphql-operation-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.graphql-operation-cell .graphql-op-name {
   font-weight: 500;
-  background-color: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.graphql-operation-kind.kind-mutation {
-  background-color: var(--vscode-charts-orange);
-  color: var(--vscode-editor-background);
+.graphql-operation-cell.kind-mutation .graphql-op-name {
+  color: var(--vscode-charts-orange, #d18616);
 }
 
-.graphql-operation-kind.kind-subscription {
-  background-color: var(--vscode-charts-purple);
-  color: var(--vscode-editor-background);
+.graphql-operation-cell.kind-subscription .graphql-op-name {
+  color: var(--vscode-charts-purple, #b180d7);
+}
+
+.graphql-operation-cell.kind-loading .graphql-op-name {
+  color: var(--vscode-disabledForeground, #888);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.graphql-kind-badge {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--vscode-font-family);
+  color: #fff;
+  background-color: var(--vscode-charts-blue, #2563eb);
+  flex-shrink: 0;
+}
+
+.graphql-kind-badge.kind-query {
+  background-color: var(--vscode-charts-green, #16a34a);
+}
+
+.graphql-kind-badge.kind-mutation {
+  background-color: var(--vscode-charts-orange, #ea580c);
+}
+
+.graphql-kind-badge.kind-subscription {
+  background-color: var(--vscode-charts-purple, #9333ea);
+}
+
+/* GraphQL syntax highlighting in the Request > Query view. */
+.graphql-syntax {
+  margin: 0;
+  padding: 8px 12px;
+  font-family: var(--vscode-editor-font-family, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: var(--vscode-editor-font-size, 12px);
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+  tab-size: 2;
+}
+
+.graphql-syntax .gql-keyword {
+  color: var(--vscode-symbolIcon-keywordForeground, #c586c0);
+  font-weight: 500;
+}
+
+.graphql-syntax .gql-name {
+  color: var(--vscode-symbolIcon-fieldForeground, #9cdcfe);
+}
+
+.graphql-syntax .gql-variable {
+  color: var(--vscode-symbolIcon-variableForeground, #4fc1ff);
+}
+
+.graphql-syntax .gql-string {
+  color: var(--vscode-symbolIcon-stringForeground, #ce9178);
+}
+
+.graphql-syntax .gql-number {
+  color: var(--vscode-symbolIcon-numberForeground, #b5cea8);
+}
+
+.graphql-syntax .gql-comment {
+  color: var(--vscode-symbolIcon-textForeground, #6a9955);
+  font-style: italic;
+}
+
+.graphql-syntax .gql-directive {
+  color: var(--vscode-symbolIcon-functionForeground, #dcdcaa);
+}
+
+.graphql-syntax .gql-spread {
+  color: var(--vscode-symbolIcon-keywordForeground, #c586c0);
+}
+
+.graphql-syntax .gql-punct {
+  color: var(--vscode-foreground);
+  opacity: 0.7;
 }

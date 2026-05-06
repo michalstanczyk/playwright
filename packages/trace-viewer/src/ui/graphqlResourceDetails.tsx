@@ -27,6 +27,7 @@ import { useTraceModel } from './traceModelContext';
 import { Expandable } from '@web/components/expandable';
 import { Toolbar } from '@web/components/toolbar';
 import type { ParsedGraphqlBody } from './graphqlTab';
+import { GraphqlSyntax } from './graphqlSyntax';
 
 type ResponseBody = { text: string } | null;
 
@@ -152,7 +153,7 @@ const RequestTab: React.FunctionComponent<{
     </ExpandableSection>
     <ExpandableSection title='Query'>
       {parsed.query
-        ? <CodeMirrorWrapper text={parsed.query} mimeType='text/plain' readOnly lineNumbers={true} wrapLines={false} />
+        ? <GraphqlSyntax text={parsed.query} />
         : parsed.persistedHash
           ? <div className='network-request-no-payload'>Persisted query — body not sent. Hash: <code>{parsed.persistedHash}</code></div>
           : <em className='network-request-no-payload'>No query body.</em>}

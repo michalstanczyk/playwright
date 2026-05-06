@@ -238,7 +238,10 @@ const renderCell = (entry: RenderedEntry, column: ColumnName): RenderedGridCell 
   if (column === 'operation') {
     const suffix = entry.parsed && entry.parsed.batchCount > 1 ? ` (+${entry.parsed.batchCount - 1})` : '';
     return {
-      body: entry.operation + suffix,
+      body: <span className={`graphql-operation-cell kind-${entry.kind}`}>
+        {entry.kind !== 'loading' && <span className={`graphql-kind-badge kind-${entry.kind}`}>{kindShort(entry.kind)}</span>}
+        <span className='graphql-op-name'>{entry.operation + suffix}</span>
+      </span>,
       title: entry.resource.request.url,
     };
   }
@@ -264,6 +267,12 @@ function kindLabel(kind: GraphqlOperationKind): string {
   if (kind === 'query') return 'Query';
   if (kind === 'mutation') return 'Mutation';
   return 'Subscription';
+}
+
+function kindShort(kind: GraphqlOperationKind): string {
+  if (kind === 'query') return 'Q';
+  if (kind === 'mutation') return 'M';
+  return 'S';
 }
 
 const renderEntry = (resource: ResourceEntry, result: ParseState, boundaries: Boundaries): RenderedEntry => {
