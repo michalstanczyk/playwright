@@ -17,6 +17,7 @@
 import * as React from 'react';
 import type { Boundaries } from './geometry';
 import './graphqlTab.css';
+import './networkFilters.css';
 import { GraphqlResourceDetails } from './graphqlResourceDetails';
 import { msToString } from '@isomorphic/formatUtils';
 import { PlaceholderPanel } from './placeholderPanel';
@@ -133,6 +134,13 @@ export function useGraphqlTabModel(model: TraceModel | undefined, selectedTime: 
   return { candidates, parseResults };
 }
 
+type GraphqlFilterState = {
+  searchValue: string;
+  kinds: Set<GraphqlOperationKind>;
+};
+
+const defaultGraphqlFilterState: GraphqlFilterState = { searchValue: '', kinds: new Set() };
+
 export const GraphqlTab: React.FunctionComponent<{
   boundaries: Boundaries,
   graphqlModel: GraphqlTabModel,
@@ -140,19 +148,29 @@ export const GraphqlTab: React.FunctionComponent<{
 }> = ({ boundaries, graphqlModel, sdkLanguage }) => {
   const [sorting, setSorting] = React.useState<Sorting | undefined>(undefined);
   const [selectedResourceKey, setSelectedResourceKey] = React.useState<string | undefined>(undefined);
+  const [filterState, setFilterState] = React.useState<GraphqlFilterState>(defaultGraphqlFilterState);
+
+  const onFilterStateChange = React.useCallback((next: GraphqlFilterState) => {
+    setFilterState(next);
+    setSelectedResourceKey(undefined);
+  }, []);
 
   const renderedEntries = React.useMemo(() => {
     const entries: RenderedEntry[] = [];
+    const search = filterState.searchValue.trim().toLowerCase();
     for (const resource of graphqlModel.candidates) {
       const result = graphqlModel.parseResults.get(resource.id);
       if (!result || result.state === 'failed')
         continue;
-      entries.push(renderEntry(resource, result, boundaries));
+      const entry = renderEntry(resource, result, boundaries);
+      if (!entryMatchesFilter(entry, search, filterState.kinds))
+        continue;
+      entries.push(entry);
     }
     if (sorting)
       sort(entries, sorting);
     return entries;
-  }, [graphqlModel.candidates, graphqlModel.parseResults, sorting, boundaries]);
+  }, [graphqlModel.candidates, graphqlModel.parseResults, sorting, boundaries, filterState]);
 
   const visibleSelectedEntry = React.useMemo(
       () => (selectedResourceKey ? renderedEntries.find(entry => entry.resource.id === selectedResourceKey) : undefined),
@@ -164,6 +182,8 @@ export const GraphqlTab: React.FunctionComponent<{
 
   if (!graphqlModel.candidates.length)
     return <PlaceholderPanel text='No GraphQL operations' />;
+
+  const filters = <GraphqlFilters filterState={filterState} onFilterStateChange={onFilterStateChange} />;
 
   const grid = <GraphqlGridView
     name='graphql'
@@ -185,6 +205,7 @@ export const GraphqlTab: React.FunctionComponent<{
   />;
 
   return <>
+    {filters}
     {!visibleSelectedEntry && grid}
     {visibleSelectedEntry && visibleSelectedEntry.parsed &&
       <SplitView
@@ -203,6 +224,76 @@ export const GraphqlTab: React.FunctionComponent<{
       />}
   </>;
 };
+
+const GRAPHQL_KINDS: GraphqlOperationKind[] = ['query', 'mutation', 'subscription'];
+
+const GraphqlFilters: React.FunctionComponent<{
+  filterState: GraphqlFilterState,
+  onFilterStateChange: (next: GraphqlFilterState) => void,
+}> = ({ filterState, onFilterStateChange }) => {
+  return (
+    <div className='network-filters'>
+      <input
+        type='search'
+        placeholder='Filter operations'
+        spellCheck={false}
+        value={filterState.searchValue}
+        onChange={e => onFilterStateChange({ ...filterState, searchValue: e.target.value })}
+      />
+      <div className='network-filters-resource-types' role='tablist' aria-multiselectable='true'>
+        <div
+          title='All'
+          onClick={() => onFilterStateChange({ ...filterState, kinds: new Set() })}
+          className={`network-filters-resource-type ${filterState.kinds.size === 0 ? 'selected' : ''}`}
+        >
+          All
+        </div>
+        {GRAPHQL_KINDS.map(kind => (
+          <div
+            key={kind}
+            title={kindLabel(kind)}
+            role='tab'
+            aria-selected={filterState.kinds.has(kind)}
+            onClick={event => {
+              const next = (event.ctrlKey || event.metaKey)
+                ? toggleSet(filterState.kinds, kind)
+                : new Set<GraphqlOperationKind>([kind]);
+              onFilterStateChange({ ...filterState, kinds: next });
+            }}
+            className={`network-filters-resource-type ${filterState.kinds.has(kind) ? 'selected' : ''}`}
+          >
+            {kindLabel(kind)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+function toggleSet<T>(set: Set<T>, value: T): Set<T> {
+  const next = new Set(set);
+  if (next.has(value))
+    next.delete(value);
+  else
+    next.add(value);
+  return next;
+}
+
+function entryMatchesFilter(entry: RenderedEntry, search: string, kinds: Set<GraphqlOperationKind>): boolean {
+  if (kinds.size > 0) {
+    if (entry.kind === 'loading')
+      return false;
+    if (!kinds.has(entry.kind))
+      return false;
+  }
+  if (!search)
+    return true;
+  if (entry.operation.toLowerCase().includes(search))
+    return true;
+  if (entry.resource.request.url.toLowerCase().includes(search))
+    return true;
+  return false;
+}
 
 const columnTitle = (column: ColumnName): string => {
   switch (column) {
